@@ -45,32 +45,14 @@ class Access {
 
 		$contactId = $_SESSION["sf-contact-id"];
 
-		$productIds = self::getNamespaceProductIds();
+		global $wgBooksOnlineProductIds;
 
-		return self::didPurchaseProducts($contactId, $productIds);
+		return self::hasCurrentSubscription($contactId, $wgBooksOnlineProductIds);
 	}
 
 
 
-	public static function didPurchaseProducts($contactId, $productIds) {
-
-		$orderItemIds = self::getUsersOrderItems($contactId, $productIds);
-
-		return !empty($orderItemIds);
-	}
-
-
-
-	public static function isBooksOnlineNamespace() {
-
-		global $wgOcdlaBooksOnlineNamespaces, $wgTitle;
-
-		return in_array($wgTitle->mNamespace, $wgOcdlaBooksOnlineNamespaces);
-	}
-
-
-
-	private static function getUsersOrderItems($contactId, $productIds) {
+	private static function hasCurrentSubscription($contactId, $productIds) {
 
 		$accessToken = $_SESSION["access-token"];
 		$instanceUrl = $_SESSION["instance-url"];
@@ -79,7 +61,10 @@ class Access {
 
 		$soqlProdIds = "'" . implode("','", $productIds) . "'";
 
-		$query = "SELECT Id FROM OrderItem WHERE Contact__c = '$contactId' AND Product2Id IN($soqlProdIds)";
+		$today = new \DateTime();
+		$today = $today->format("Y-m-d");
+
+		$query = "SELECT Id FROM OrderItem WHERE Contact__c = '$contactId' AND RealExpirationDate__c > $today AND Product2id IN($soqlProdIds)";
 
 		$resp = $api->query($query);
 
@@ -91,34 +76,14 @@ class Access {
 			$orderItemIds[] = $record["Id"];
 		}
 
-		return $orderItemIds;
+		return !empty($orderItemIds);
 	}
 
-	private static function getNamespaceProductIds(){
 
-		global $wgTitle, $wgExtraNamespaces;
+	public static function isBooksOnlineNamespace() {
 
-		$namespace = $wgExtraNamespaces[$wgTitle->mNamespace];
+		global $wgOcdlaBooksOnlineNamespaces, $wgTitle;
 
-		$accessToken = $_SESSION["access-token"];
-		$instanceUrl = $_SESSION["instance-url"];
-		
-		$api = new RestApiRequest($instanceUrl, $accessToken);
-
-		$query = "SELECT Id FROM Product2 WHERE Name LIKE '%$namespace%'";
-
-		$resp = $api->query($query);
-
-		if(!$resp->success()) throw new \Exception($resp->getErrorMessage());
-
-		$records = $resp->getRecords();
-
-		$productIds = array();
-		foreach($records as $record){
-
-			$productIds[] = $record["Id"];
-		}
-
-		return $productIds;
+		return in_array($wgTitle->mNamespace, $wgOcdlaBooksOnlineNamespaces);
 	}
 }
