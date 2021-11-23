@@ -1,0 +1,11 @@
+{
+    "name": "ocdladefense/mw-access-books-online",
+    "type": "wordpress-theme",
+    "authors": [
+        {
+            "name": "trevoruehlinx1",
+            "email": "trevoruehlinx1@gmail.com"
+        }
+    ],
+    "require": {}
+}
