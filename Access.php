@@ -59,12 +59,13 @@ class Access {
 		
 		$api = new RestApiRequest($instanceUrl, $accessToken);
 
-		$soqlProdIds = "'" . implode("','", $productIds) . "'";
+		$booksOnlineProducts = "'" . implode("','", $productIds) . "'";
 
 		$today = new \DateTime();
 		$today = $today->format("Y-m-d");
 
-		$query = "SELECT Id FROM OrderItem WHERE Contact__c = '$contactId' AND RealExpirationDate__c > $today AND Product2id IN($soqlProdIds)";
+		// We need to make sure that the order is not in a draft status.  Order that is in "draft" stage should not give people access.
+		$query = "SELECT Id FROM OrderItem WHERE Contact__c = '$contactId' AND RealExpirationDate__c > $today AND Product2Id IN($booksOnlineProducts)";
 
 		$resp = $api->query($query);
 
