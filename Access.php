@@ -56,6 +56,13 @@ class Access {
 
 		$accessToken = $_SESSION["access-token"];
 		$instanceUrl = $_SESSION["instance-url"];
+
+		global $oauth_config;
+
+		// If the access token has been removed from the session somehow, but the user is still logged in.
+		// Could throw an exception
+		// Could have a function somewhere that requests a new token and adds it to the session
+
 		
 		$api = new RestApiRequest($instanceUrl, $accessToken);
 
@@ -64,7 +71,8 @@ class Access {
 		$today = new \DateTime();
 		$today = $today->format("Y-m-d");
 
-		$query = "SELECT Id FROM OrderItem WHERE Contact__c = '$contactId' AND RealExpirationDate__c > $today AND Product2id IN($soqlProdIds)";
+		//$query = "SELECT Id FROM OrderItem WHERE Contact__c = '$contactId' AND RealExpirationDate__c > $today AND Product2id IN($soqlProdIds)";
+		$query = "SELECT Id, OrderId, Order.ActivatedDate, Order.EffectiveDate, RealExpirationDate__c FROM OrderItem WHERE Contact__c = '$contactId' AND Product2Id IN(SELECT Id FROM Product2 WHERE Name LIKE '%Books Online%' AND IsActive = True) AND RealExpirationDate__c > $today";
 
 		$resp = $api->query($query);
 
