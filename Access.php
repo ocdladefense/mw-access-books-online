@@ -98,11 +98,16 @@ class Access {
 		$today = new \DateTime();
 		$today = $today->format("Y-m-d");
 
+		$minPurchaseDate = new \DateTime();
+		$minPurchaseDate->modify("-367 days");
+		$minPurchaseDate = $minPurchaseDate->format("Y-m-d");
+
+
 		// We need to make sure that the order is not in a draft status.  Order that is in "draft" stage should not give people access.
 
 		// Subscription should last only a year, but we dont have a reliable way of determining expiration.
 		//$query = "SELECT Id FROM OrderItem WHERE Contact__c = '$contactId' AND RealExpirationDate__c > $today AND Product2id IN($soqlProdIds)";
-		$query = "SELECT Id, OrderId, Order.ActivatedDate, Order.EffectiveDate FROM OrderItem WHERE Contact__c = '$contactId' AND Product2Id IN(SELECT Id FROM Product2 WHERE Name LIKE '%Books Online%' AND IsActive = True) AND Order.StatusCode != 'Draft'";
+		$query = "SELECT Id, OrderId, Order.ActivatedDate, Order.EffectiveDate FROM OrderItem WHERE Contact__c = '$contactId' AND Product2Id IN(SELECT Id FROM Product2 WHERE Name LIKE '%Books Online%' AND IsActive = True) AND Order.StatusCode != 'Draft' AND Order.EffectiveDate > $minPurchaseDate";
 
 
 		$resp = $api->query($query);
