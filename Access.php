@@ -28,24 +28,14 @@ class Access {
 		}
 		
 		// Otherwise, check to see if the user has purchased the Books Online product
-		try {
+		if(self::hasAccess()){
+		
+			$aRights[] = "read";
 
-			if(self::hasAccess()){
-			
-				$aRights[] = "read";
-	
-			} else { // logged in users that don't have read permisson get the "permission error" page.
-	
-				$aRights = array_filter($aRights, function($right){
-				
-					return $right != "read";
-				});
-			}
-
-		} catch(Exception $e) { // If we catch an exception, just remove read permission, and show the permission error.
+		} else { // logged in users that don't have read permisson get the "permission error" page.
 
 			$aRights = array_filter($aRights, function($right){
-				
+			
 				return $right != "read";
 			});
 		}
@@ -70,13 +60,13 @@ class Access {
 
 		$accessToken = $_SESSION["access-token"];
 		$instanceUrl = $_SESSION["instance-url"];
+
+		// If the access token has been removed from the session, return false...for now.  (Need a better solution)
+		if(empty($accessToken) || empty($instanceUrl)) return false;
 		
 		$api = new RestApiRequest($instanceUrl, $accessToken);
 
 		$booksOnlineProducts = "'" . implode("','", $productIds) . "'";
-
-		$today = new \DateTime();
-		$today = $today->format("Y-m-d");
 
 		$minPurchaseDate = new \DateTime();
 		$minPurchaseDate->modify("-367 days");
