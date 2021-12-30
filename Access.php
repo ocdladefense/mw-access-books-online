@@ -12,7 +12,14 @@ use \Salesforce\RestApiRequest;
 
 class Access {
 
+
+	// Approach: after UserGetRights runs, we can still tell that the user doesn't have READ rights on the page.
+	// If the user doesn't have read rights on the page, update the page's status code "onBeforePageDisplay."
+
+
+
 	public static function onUserGetRights(\User $user, array &$aRights) {
+
 
 		if(!self::isBooksOnlineNamespace()) return true;
 
@@ -23,6 +30,9 @@ class Access {
 			
 				return $right != "read";
 			});
+			
+
+			http_response_code(403);
 			
 			return true;
 		}
@@ -38,7 +48,12 @@ class Access {
 			
 				return $right != "read";
 			});
+
+			http_response_code(403);
 		}
+
+
+		
 
 		return true;
 	}
