@@ -52,7 +52,7 @@ class Access {
 			http_response_code(403);
 		}
 		
-		// Otherwise, check to see if the user has purchased the Books Online product
+		// Otherwise, based on logic above the user does not have access to Books Online.
 		else if($hasAccess) {
 		
 			$aRights[] = "read";
