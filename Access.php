@@ -29,7 +29,19 @@ class Access {
 		// By default, assume the user does not have BON access.
 		$hasAccess = false;
 
-		// Guest users should not be able to view online products.  If read is set to true for guest users, you cant override that.  $wgGroupPermissons might take presidence.
+
+
+		// Guest users shouldn't access Books Online products,
+		// so remove the "read" permission from rights.
+		// However, $wgGroupPermissions (or $wgGroupPermissions['*']) appears to
+		// take precedence over $aRights: access will still be granted to
+		// guest users when:
+		//
+		// $wgGroupPermissions['*']['read'] = true;
+		//
+		// @TODO - check the source code to verify how MediaWiki grants access based on 
+		// both $aRights and $wgGroupPermissions.
+		
 		if($user->isAnon() || false === $hasAccess = self::hasAccess($contactId)){
 
 			$aRights = array_filter($aRights, function($right){
