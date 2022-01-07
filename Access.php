@@ -20,6 +20,11 @@ class Access {
 
 	public static function onUserGetRights(\User $user, array &$aRights) {
 
+		if(in_array("sysop", $user->getGroups())){
+
+			return true;
+		}
+
 		// Ignore non BON namespaces.
 		if(!self::isBooksOnlineNamespace()) return true;
 
