@@ -97,15 +97,9 @@ class Access {
 
 		$resp = $api->query($query);
 
-		if(!$resp->success()) throw new \Exception($resp->getErrorMessage());
+		// if(!$resp->success()) throw new \Exception($resp->getErrorMessage());
 
-		$orderItemIds = array();
-		foreach($resp->getRecords() as $record) {
-
-			$orderItemIds[] = $record["Id"];
-		}
-
-		return !empty($orderItemIds);
+		return $resp->success() && count($resp->getRecords()) > 0;
 	}
 
 
