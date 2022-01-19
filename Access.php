@@ -73,12 +73,12 @@ class Access {
 
 		global $wgBooksOnlineProductIds;
 
-		return empty($contactId) ? false : self::hasCurrentSubscription($contactId, $wgBooksOnlineProductIds);
+		return empty($contactId) ? false : self::hasCurrentSubscription($contactId);
 	}
 
 
 
-	private static function hasCurrentSubscription($contactId, $productIds) {
+	private static function hasCurrentSubscription($contactId) {
 
 		$accessToken = $_SESSION["access-token"];
 		$instanceUrl = $_SESSION["instance-url"];
@@ -87,8 +87,6 @@ class Access {
 		if(empty($accessToken) || empty($instanceUrl)) return false;
 		
 		$api = new RestApiRequest($instanceUrl, $accessToken);
-
-		$booksOnlineProducts = "'" . implode("','", $productIds) . "'";
 
 		$minPurchaseDate = new \DateTime();
 		$minPurchaseDate->modify("-367 days");
