@@ -83,29 +83,32 @@ class Access {
 		
 		$api = new RestApiRequest($instanceUrl, $accessToken);
 
-		$booksOnlineProducts = "'" . implode("','", $productIds) . "'";
+		$purchaseWindow = new \DateTime();
+		$purchaseWindow->modify("-365 days");
+		$purchaseWindow = $purchaseWindow->format("Y-m-d");
 
-		$minPurchaseDate = new \DateTime();
-		$minPurchaseDate->modify("-367 days");
-		$minPurchaseDate = $minPurchaseDate->format("Y-m-d");
-
-
+        
 		// Subscription should last only a year, but we dont have a reliable way of determining expiration.
 		//$query = "SELECT Id FROM OrderItem WHERE Contact__c = '$contactId' AND RealExpirationDate__c > $today AND Product2id IN($soqlProdIds)";
-		$query = "SELECT Id, OrderId, Order.ActivatedDate, Order.EffectiveDate FROM OrderItem WHERE Contact__c = '$contactId' AND Product2Id IN(SELECT Id FROM Product2 WHERE Name LIKE '%Books Online%' AND IsActive = True) AND Order.StatusCode != 'Draft' AND Order.EffectiveDate > $minPurchaseDate";
+		$query = "SELECT Id, Product2.OcdlaSubscriptionTermDays__c, OrderId, Order.ActivatedDate, Order.EffectiveDate FROM OrderItem WHERE Contact__c = '$contactId' AND Product2Id IN(SELECT Id FROM Product2 WHERE Name LIKE '%Books Online%' AND IsActive = True) AND Order.StatusCode != 'Draft' AND Order.EffectiveDate > $purchaseWindow ORDER BY Order.EffectiveDate DESC";
 
 
 		$resp = $api->query($query);
 
-		if(!$resp->success()) throw new \Exception($resp->getErrorMessage());
 
-		$orderItemIds = array();
-		foreach($resp->getRecords() as $record) {
+        if(!$resp->success() || count($resp->getRecords()) < 1) return false;
 
-			$orderItemIds[] = $record["Id"];
-		}
+        foreach($resp->getRecords() as $record) {
 
-		return !empty($orderItemIds);
+            $expirationDate = new \DateTime($record["Order"]["EffectiveDate"]);
+            $expirationDate->modify("+{$record["Product2"]["OcdlaSubscriptionTermDays__c"]} days");
+
+            $today = new \DateTime();
+
+            if($expirationDate >= $today) return true;
+        }
+
+		return false; // 
 	}
 
 
